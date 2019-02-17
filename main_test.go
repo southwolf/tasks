@@ -11,13 +11,9 @@ import (
 
 func TestCreateTasks(t *testing.T) {
 	taskPayload := `{"id":1,"title":"Hello world!","done":false}`
-	request, err := http.NewRequest("POST", "/tasks", strings.NewReader(taskPayload))
-	if err != nil {
-		t.Fatal(err)
-	}
+	request, _ := http.NewRequest("POST", "/tasks", strings.NewReader(taskPayload))
 	response := httptest.NewRecorder()
-	handler := http.HandlerFunc(CreateTask)
-	handler.ServeHTTP(response, request)
+	CreateTask(response, request)
 
 	expected := taskPayload
 	actual := strings.TrimSpace(response.Body.String())
@@ -27,13 +23,9 @@ func TestCreateTasks(t *testing.T) {
 }
 
 func TestGetTasks(t *testing.T) {
-	request, err := http.NewRequest("GET", "/tasks", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
+	request, _ := http.NewRequest("GET", "/tasks", nil)
 	response := httptest.NewRecorder()
-	handler := http.HandlerFunc(GetTasks)
-	handler.ServeHTTP(response, request)
+	GetTasks(response, request)
 
 	expected := `[{"id":1,"title":"Hello world!","done":false}]`
 	actual := strings.TrimSpace(response.Body.String())
