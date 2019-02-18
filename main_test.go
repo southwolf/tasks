@@ -49,3 +49,34 @@ func TestGetTask(t *testing.T) {
 		t.Errorf("Wrong response: got %v want %v", actual, expected)
 	}
 }
+
+func TestUpdateTask(t *testing.T) {
+	routes := mux.NewRouter()
+	routes.HandleFunc("/tasks/{id}", UpdateTask)
+
+	taskPayload := `{"id":1,"title":"Hello world!","done":true}`
+	request, _ := http.NewRequest("PUT", "/tasks/1", strings.NewReader(taskPayload))
+	response := httptest.NewRecorder()
+	routes.ServeHTTP(response, request)
+
+	expected := taskPayload
+	actual := strings.TrimSpace(response.Body.String())
+	if actual != expected {
+		t.Errorf("Wrong response: got %v want %v", actual, expected)
+	}
+}
+
+func TestDeleteTask(t *testing.T) {
+	routes := mux.NewRouter()
+	routes.HandleFunc("/tasks/{id}", DeleteTask)
+
+	request, _ := http.NewRequest("DELETE", "/tasks/1", nil)
+	response := httptest.NewRecorder()
+	routes.ServeHTTP(response, request)
+
+	expected := ""
+	actual := strings.TrimSpace(response.Body.String())
+	if actual != expected {
+		t.Errorf("Wrong response: got %v want %v", actual, expected)
+	}
+}

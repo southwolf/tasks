@@ -24,8 +24,10 @@ func main() {
 	routes := mux.NewRouter()
 
 	routes.Methods("GET").Path("/tasks").HandlerFunc(GetTasks)
-	routes.Methods("GET").Path("/tasks/{id}").HandlerFunc(GetTask)
 	routes.Methods("POST").Path("/tasks").HandlerFunc(CreateTask)
+	routes.Methods("GET").Path("/tasks/{id}").HandlerFunc(GetTask)
+	routes.Methods("PUT").Path("/tasks/{id}").HandlerFunc(UpdateTask)
+	routes.Methods("DELETE").Path("/tasks/{id}").HandlerFunc(DeleteTask)
 
 	log.Printf("Server running on %s", Port)
 	log.Fatal(http.ListenAndServe(Port, routes))
@@ -66,4 +68,42 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(task)
+}
+
+func DeleteTask(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	for index, item := range tasks {
+		if item.ID == id {
+			tasks = append(tasks[:index], tasks[index+1:]...)
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func UpdateTask(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	var task Task
+	json.NewDecoder(r.Body).Decode(&task)
+
+	for index, item := range tasks {
+		if item.ID == id {
+			tempTasks := append(tasks[:index], task)
+			tasks = append(tempTasks, tasks[index+1:]...)
+			json.NewEncoder(w).Encode(task)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusNotFound) // no matches found
 }
